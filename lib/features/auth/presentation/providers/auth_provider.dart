@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:teslo_shop/features/auth/domain/domain.dart';
 import 'package:teslo_shop/features/auth/infrastructure/infrastructure.dart';
@@ -38,7 +40,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> registerUser(String email, String password, String fullname) async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 500));
 
+      final response = await authRepository.register(email, password, fullname);
+      
+      print('=====REGISTRO COMPLETADO=====');
+      print('Token: ${response.token}');
+    } on WrongCredentials {
+      logout('Credenciales incorrectas');
+    } on ConnectionTimeout {
+      logout('Timeout');
+    } on CustomError catch (e) {
+      logout('${e.message}, ${e.errorCode}');
+    } catch (e) {
+      logout('Unknowing error');
+    }
   }
 
   Future<void> checkAuthStatus() async {

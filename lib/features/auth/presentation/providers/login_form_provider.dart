@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:formz/formz.dart';
 import 'package:teslo_shop/features/auth/presentation/providers/auth_provider.dart';
@@ -55,9 +53,11 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
 
     if(!state.isValid) return;
 
+    state = state.copyWith(isPosting: true);
+
     await loginUser(state.email.value, state.password.value);
 
-    print(state);
+    state = state.copyWith(isPosting: false);
   }
 }
 

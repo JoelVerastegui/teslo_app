@@ -11,9 +11,24 @@ class AuthDatasourceImpl extends AuthDatasource{
   );
 
   @override
-  Future<User> checkAuthStatus(String token) {
-    // TODO: implement checkAuth
-    throw UnimplementedError();
+  Future<User> checkAuthStatus(String token) async {
+    try {
+      final response = await dio.get('/auth/check-status',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token'
+          }
+        )
+      );
+
+      final user = UserMapper.userJsonToEntity(response.data);
+      return user;
+    } on DioException catch (e) {
+      if(e.response?.statusCode == 401) throw CustomError('Invalid Token', '401');
+      throw Exception();
+    } catch (e) {
+      throw Exception();
+    }
   }
 
   @override
@@ -28,9 +43,9 @@ class AuthDatasourceImpl extends AuthDatasource{
 
       return user;
     } on DioException catch (e) {
-      if(e.response?.statusCode == 401) throw WrongCredentials;
+      if(e.response?.statusCode == 401) throw WrongCredentials();
 
-      if(e.type == DioExceptionType.connectionTimeout) throw ConnectionTimeout;
+      if(e.type == DioExceptionType.connectionTimeout) throw ConnectionTimeout();
 
       throw CustomError('Custom error exception', '1');
     } catch (e) {
@@ -51,8 +66,8 @@ class AuthDatasourceImpl extends AuthDatasource{
 
       return user;
     } on DioException catch (e) {
-      if(e.response?.statusCode == 401) throw WrongCredentials;
-      if(e.type == DioExceptionType.connectionTimeout) throw ConnectionTimeout;
+      if(e.response?.statusCode == 401) throw WrongCredentials();
+      if(e.type == DioExceptionType.connectionTimeout) throw ConnectionTimeout();
       throw CustomError('Custom error: ${e.message}','Status code: ${e.response?.statusCode}');
     } catch (e) {
       throw Exception();
